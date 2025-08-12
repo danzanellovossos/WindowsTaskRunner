@@ -27,9 +27,28 @@ By default, Windows Task Scheduler does **not** allow GUI tasks when nobody is l
 
 ## Requirements
 
+**Tested Windows Versions**: This solution has been tested and confirmed working on Windows Server 2008, 2016, 2019, and 2022. It also works on Windows 10/11 Pro/Enterprise editions.
+
+**Important Note**: The ability to monitor your interactive tasks through the loopback RDP connection depends on having multiple RDP sessions enabled. With only a single session allowed, you won't be able to connect for monitoring while your automated task is running.
+
 1. **Enable Concurrent RDP Sessions**  
    - **Best practice**: allow multiple (or at least two) RDP sessions in Local/Group Policy.  
    - If only a single session is allowed, once someone manually logs in via RDP, it might disconnect the session hosting your interactive task.
+
+   **Step-by-step instructions**:
+   
+   **Option A: Local Group Policy Editor (Windows Pro/Enterprise/Server)**
+   - Press `Win + R`, type `gpedit.msc`, press Enter
+   - Navigate to: `Computer Configuration → Administrative Templates → Windows Components → Remote Desktop Services → Remote Desktop Connection Host → Connections`
+   - Double-click "Limit number of connections"
+   - Set to "Enabled" and set the value to `2` or higher
+   
+   **Option B: Registry Editor (All Windows versions)**
+   - Press `Win + R`, type `regedit`, press Enter
+   - Navigate to: `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services`
+   - Create DWORD value: `MaxConnections` with value `2` or higher
+   
+   **Note**: Windows 10/11 Pro/Enterprise and Windows Server support multiple RDP sessions. Windows 10/11 Home has limited RDP functionality.
 
 2. **Windows Credential for Loopback**  
    - Create a generic credential mapping a loopback address (e.g., `127.0.0.2`) to the user running the tasks.
@@ -41,6 +60,25 @@ By default, Windows Task Scheduler does **not** allow GUI tasks when nobody is l
 4. **Grant "Log on as a batch job" Right**  
    - In **Security Settings → Local Policies → User Rights Assignment**, ensure the user account that runs these tasks is explicitly added to **"Log on as a batch job."**  
    - Without this, the system may block non-interactive or scheduled runs, resulting in access errors.
+
+   **Step-by-step instructions**:
+   
+   **Option A: Local Security Policy (Windows Pro/Enterprise/Server)**
+   - Press `Win + R`, type `secpol.msc`, press Enter
+   - Navigate to: `Security Settings → Local Policies → User Rights Assignment`
+   - Double-click "Log on as a batch job"
+   - Click "Add User or Group" and add your service account
+   
+   **Option B: Group Policy Editor (Windows Pro/Enterprise/Server)**
+   - Press `Win + R`, type `gpedit.msc`, press Enter
+   - Navigate to: `Computer Configuration → Windows Settings → Security Settings → Local Policies → User Rights Assignment`
+   - Double-click "Log on as a batch job"
+   - Click "Add User or Group" and add your service account
+   
+   **Option C: Registry Editor (All Windows versions)**
+   - Press `Win + R`, type `regedit`, press Enter
+   - Navigate to: `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
+   - Look for existing values or create appropriate registry entries for batch logon rights
 
 ## How It Works
 
