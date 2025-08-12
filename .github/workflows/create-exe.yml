@@ -1,0 +1,39 @@
+name: Build and Release PowerShell EXE
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build_exe:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install PS2EXE
+      run: |
+        Install-Module -Name ps2exe -Force
+
+    - name: Convert PowerShell script to EXE
+      run: |
+        ps2exe .\scripts\RunTask.ps1 .\scripts\RunTask.exe
+
+    - name: Zip the EXE
+      shell: pwsh
+      run: |
+        Compress-Archive -Path .\scripts\RunTask.exe -DestinationPath .\scripts\RunTask.zip -Force
+
+    - name: Upload ZIP as Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./scripts/RunTask.zip
+        asset_name: TaskRunner.zip
+        asset_content_type: application/zip
