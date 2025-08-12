@@ -57,6 +57,18 @@ By default, Windows Task Scheduler does **not** allow GUI tasks when nobody is l
    - Provide a `.rdp` file (pointing to your chosen loopback IP) to the script via `-RDPConfig`.  
    - You can also use this file to manually RDP in to see what's running.
 
+   **Creating the RDP File**:
+   
+   - Open Remote Desktop Connection (`mstsc.exe`)
+   - Set **Computer** to your loopback IP (e.g., `127.0.0.2`)
+   - Set **User name** to your service account username
+   - Check **Allow me to save credentials**
+   - Click **Show Options** → **Display** tab → Set resolution (e.g., 1920x1080)
+   - Save as `TaskRunner.rdp` in a secure location
+   - Test the connection manually first, then disconnect
+   
+   **Important**: The loopback IP must match what you configure in Windows Credential Manager.
+
 4. **Grant "Log on as a batch job" Right**  
    - In **Security Settings → Local Policies → User Rights Assignment**, ensure the user account that runs these tasks is explicitly added to **"Log on as a batch job."**  
    - Without this, the system may block non-interactive or scheduled runs, resulting in access errors.
